@@ -420,7 +420,7 @@ def format_uncertainty(value, uncertianty, scinotn_break=4):
         return "{0:f}".format(value)
     else:
         # Return a string of the form "0.00 \pm 0.01".
-        mag_unc = int(np.log10(np.abs(uncertianty)))
+        mag_unc = int(np.log10(np.abs(uncertianty))) if value != 0 else 0
         # Zero should be printed as a single digit; that is, as wide as str "1".
         mag_val = int(np.log10(np.abs(value))) if value != 0 else 0
         n_digits = max(mag_val - mag_unc, 0)
