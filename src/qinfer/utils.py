@@ -405,47 +405,50 @@ def assert_sigfigs_equal(x, y, sigfigs=3):
     # now test if abs(x-y) < 0.5 * 10**(-sigfigs)
     assert_almost_equal(x, y, sigfigs)
 
-def format_uncertainty(value, uncertianty, scinotn_break=4):
+def format_uncertainty(value, uncertainty, scinotn_break=4):
     """
-    Given a value and its uncertianty, format as a LaTeX string
+    Given a value and its uncertainty, format as a LaTeX string
     for pretty-printing.
 
     :param int scinotn_break: How many decimal points to print
         before breaking into scientific notation.
     """
-    if uncertianty == 0:
+    if uncertainty == 0:
         # Return the exact number, without the ± annotation as a fixed point
         # number, since all digits matter.
         # FIXME: this assumes a precision of 6; need to select that dynamically.
         return "{0:f}".format(value)
+    elif np.isnan(uncertainty):
+        # If the uncertainty is a NaN, show that.
+        return r"{0:f} \pm NaN".format(value)
     else:
         # Return a string of the form "0.00 \pm 0.01".
-        mag_unc = int(np.log10(np.abs(uncertianty)))
+        mag_unc = int(np.log10(np.abs(uncertainty)))
         # Zero should be printed as a single digit; that is, as wide as str "1".
         mag_val = int(np.log10(np.abs(value))) if value != 0 else 0
         n_digits = max(mag_val - mag_unc, 0)
 
 
         if abs(mag_val) < abs(mag_unc) and abs(mag_unc) > scinotn_break:
-            # We're formatting something close to zero, so recale uncertianty
+            # We're formatting something close to zero, so recale uncertainty
             # accordingly.
             scale = 10**mag_unc
             return r"({{0:0.{0}f}} \pm {{1:0.{0}f}}) \times 10^{{2}}".format(
                 n_digits
             ).format(
                 value / scale,
-                uncertianty / scale,
+                uncertainty / scale,
                 mag_unc
            )
         if abs(mag_val) <= scinotn_break:
-            return r"{{0:0.{n_digits}f}} \pm {{1:0.{n_digits}f}}".format(n_digits=n_digits).format(value, uncertianty)
+            return r"{{0:0.{n_digits}f}} \pm {{1:0.{n_digits}f}}".format(n_digits=n_digits).format(value, uncertainty)
         else:
             scale = 10**mag_val
             return r"({{0:0.{0}f}} \pm {{1:0.{0}f}}) \times 10^{{2}}".format(
                 n_digits
             ).format(
                 value / scale,
-                uncertianty / scale,
+                uncertainty / scale,
                 mag_val
            )
 
